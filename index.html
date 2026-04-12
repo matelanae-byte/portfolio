@@ -334,7 +334,7 @@
         <h2 class="cta__title">Если тебе нужен сайт, который выглядит сильно и ощущается современно — давай соберём</h2>
         <p class="cta__text">Могу помочь с концепцией, структурой, упаковкой и реализацией. От первого вайба до готовой страницы.</p>
         <div class="cta__actions">
-          <a class="btn btn--primary" href="https://t.me/yourname">Написать мне</a>
+          <button class="btn btn--primary" type="button" id="open-modal">Написать мне</button>
           <a class="btn btn--ghost" href="#projects">Посмотреть работы</a>
         </div>
       </div>
@@ -360,6 +360,40 @@
     <p>© Vibe Coder — digital &amp; AI experiences</p>
     <a href="#top" class="footer__up">Наверх</a>
   </footer>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button class="modal__close" id="modal-close" type="button" aria-label="Закрыть">&times;</button>
+      <h2 class="modal__title" id="modal-title">Оставьте заявку</h2>
+      <p class="modal__subtitle">Заполните форму и я свяжусь с вами в ближайшее время</p>
+      <form class="modal__form" id="contact-form" novalidate>
+        <div class="form-group">
+          <input class="form-input" type="text" id="form-name" name="name" placeholder=" " required>
+          <label class="form-label" for="form-name">Имя</label>
+        </div>
+        <div class="form-group">
+          <input class="form-input" type="email" id="form-email" name="email" placeholder=" " required>
+          <label class="form-label" for="form-email">Электронная почта</label>
+        </div>
+        <div class="form-group">
+          <input class="form-input" type="tel" id="form-phone" name="phone" placeholder=" " required>
+          <label class="form-label" for="form-phone">Номер телефона</label>
+        </div>
+        <label class="form-consent">
+          <input type="checkbox" id="form-consent" name="consent" required>
+          <span class="form-consent__check"></span>
+          <span class="form-consent__text">Даю согласие на обработку моих персональных данных</span>
+        </label>
+        <button class="btn btn--primary modal__submit" type="submit" id="form-submit" disabled>Отправить</button>
+      </form>
+      <div class="modal__success" id="modal-success" hidden>
+        <div class="modal__success-icon">&#10003;</div>
+        <h3>Спасибо!</h3>
+        <p>Ваша заявка отправлена. Я свяжусь с вами в ближайшее время.</p>
+      </div>
+    </div>
+  </div>
 
   <script>
     (function () {
@@ -1105,6 +1139,105 @@
           }
           if (!stillOver && curLeave) curLeave();
         }, { passive: true });
+      })();
+
+      /* === Contact Modal === */
+      (function () {
+        var overlay = document.getElementById('modal-overlay');
+        var modal = overlay.querySelector('.modal');
+        var openBtn = document.getElementById('open-modal');
+        var closeBtn = document.getElementById('modal-close');
+        var form = document.getElementById('contact-form');
+        var submitBtn = document.getElementById('form-submit');
+        var consentCb = document.getElementById('form-consent');
+        var successBlock = document.getElementById('modal-success');
+        var inputs = form.querySelectorAll('.form-input');
+
+        function openModal() {
+          overlay.classList.add('is-active');
+          document.body.style.overflow = 'hidden';
+          setTimeout(function () { inputs[0].focus(); }, 350);
+        }
+
+        function closeModal() {
+          overlay.classList.remove('is-active');
+          document.body.style.overflow = '';
+        }
+
+        function resetForm() {
+          form.reset();
+          form.hidden = false;
+          successBlock.hidden = true;
+          submitBtn.disabled = true;
+          inputs.forEach(function (inp) { inp.classList.remove('is-invalid'); });
+        }
+
+        openBtn.addEventListener('click', function () {
+          resetForm();
+          openModal();
+        });
+
+        closeBtn.addEventListener('click', closeModal);
+
+        overlay.addEventListener('click', function (e) {
+          if (e.target === overlay) closeModal();
+        });
+
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && overlay.classList.contains('is-active')) closeModal();
+        });
+
+        function updateSubmitState() {
+          var allFilled = true;
+          inputs.forEach(function (inp) {
+            if (!inp.value.trim()) allFilled = false;
+          });
+          submitBtn.disabled = !(allFilled && consentCb.checked);
+        }
+
+        inputs.forEach(function (inp) {
+          inp.addEventListener('input', updateSubmitState);
+        });
+        consentCb.addEventListener('change', updateSubmitState);
+
+        function validateEmail(email) {
+          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function validatePhone(phone) {
+          return /^[\d\s\+\-\(\)]{7,}$/.test(phone.trim());
+        }
+
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var valid = true;
+
+          inputs.forEach(function (inp) { inp.classList.remove('is-invalid'); });
+
+          var nameVal = document.getElementById('form-name').value.trim();
+          var emailVal = document.getElementById('form-email').value.trim();
+          var phoneVal = document.getElementById('form-phone').value.trim();
+
+          if (!nameVal) {
+            document.getElementById('form-name').classList.add('is-invalid');
+            valid = false;
+          }
+          if (!validateEmail(emailVal)) {
+            document.getElementById('form-email').classList.add('is-invalid');
+            valid = false;
+          }
+          if (!validatePhone(phoneVal)) {
+            document.getElementById('form-phone').classList.add('is-invalid');
+            valid = false;
+          }
+
+          if (!valid) return;
+
+          form.hidden = true;
+          successBlock.hidden = false;
+
+          setTimeout(closeModal, 3000);
+        });
       })();
 
     })();
