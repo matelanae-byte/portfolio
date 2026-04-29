@@ -1724,6 +1724,7 @@ main {
 .project-grid .reveal:nth-child(3) { transition-delay: 0.15s; }
 .project-grid .reveal:nth-child(4) { transition-delay: 0.2s; }
 .project-grid .reveal:nth-child(5) { transition-delay: 0.25s; }
+.project-grid .reveal:nth-child(6) { transition-delay: 0.3s; }
 
 /* stagger children animation */
 .stagger {
